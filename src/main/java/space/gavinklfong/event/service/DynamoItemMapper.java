@@ -11,6 +11,10 @@ import java.util.Set;
 
 public class DynamoItemMapper {
 
+    private DynamoItemMapper() {
+        super();
+    }
+
     public static ShowItem mapShowItem(Map<String, AttributeValue> item) {
         ShowItem.ShowItemBuilder builder = ShowItem.builder();
         Set<Map.Entry<String, AttributeValue>> entries = item.entrySet();

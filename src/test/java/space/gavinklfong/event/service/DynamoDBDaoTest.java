@@ -16,9 +16,15 @@ import java.util.stream.IntStream;
 @Slf4j
 class DynamoDBDaoTest {
 
+    private DynamoDBDao dynamoDBDao = new DynamoDBDao();
+
+    @Test
+    void createTable() {
+        dynamoDBDao.createTable();
+    }
+
     @Test
     void retrieveDataTest() {
-        DynamoDBDao dynamoDBDao = new DynamoDBDao();
         ImmutablePair<ShowItem, List<TicketItem>> pair = dynamoDBDao.retrieveShowTickets("ed021707-743f-49d1-bb04-de6e7abdcdd2");
         log.info("show: {}", pair.getLeft());
         log.info("tickets: {}", pair.getRight());
@@ -32,7 +38,6 @@ class DynamoDBDaoTest {
     }
 
     private void saveShow(String showId, String name, String venue) {
-        DynamoDBDao dynamoDBDao = new DynamoDBDao();
         ShowItem showItem = ShowItem.builder()
                 .showId(showId)
                 .sortKey("SHOW")
@@ -46,7 +51,6 @@ class DynamoDBDaoTest {
     }
 
     private void saveTicket(String showId, String ticketId, TicketStatus ticketStatus) {
-        DynamoDBDao dynamoDBDao = new DynamoDBDao();
         TicketItem.TicketItemBuilder builder = TicketItem.builder()
                 .showId(showId)
                 .sortKey(ticketId)
