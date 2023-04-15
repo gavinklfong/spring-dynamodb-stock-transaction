@@ -1,4 +1,4 @@
-package space.gavinklfong.event.dto;
+package space.gavinklfong.theatre.dto;
 
 import lombok.Builder;
 import lombok.Value;
@@ -10,4 +10,5 @@ public class Ticket {
     String status;
     Double price;
     String area;
+    String reference;
 }

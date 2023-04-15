@@ -1,4 +1,4 @@
-package space.gavinklfong.event.dto;
+package space.gavinklfong.theatre.dto;
 
 import lombok.Builder;
 import lombok.Value;
@@ -8,8 +8,9 @@ import java.time.LocalDateTime;
 @Builder
 @Value
 public class Show {
+    String showId;
     String name;
-    String description;
-    String location;
     LocalDateTime dateTime;
+    Integer durationInMinute;
+    String venue;
 }

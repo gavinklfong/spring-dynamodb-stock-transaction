@@ -1,4 +1,4 @@
-package space.gavinklfong.event.model;
+package space.gavinklfong.theatre.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -8,17 +8,20 @@ import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbBean;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbPartitionKey;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbSortKey;
 
+import java.time.LocalDateTime;
+
 @DynamoDbBean
 @Builder
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class TicketItem {
+public class ShowItem {
     String showId;
     String sortKey;
-    TicketStatus status;
-    Double price;
-    String ticketRef;
+    String name;
+    LocalDateTime dateTime;
+    Integer durationInMinute;
+    String venue;
 
     @DynamoDbPartitionKey
     public void setShowId(String showId) {

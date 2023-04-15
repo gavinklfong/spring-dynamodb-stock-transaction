@@ -1,9 +1,9 @@
-package space.gavinklfong.event.service;
+package space.gavinklfong.theatre.dao;
 
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
-import space.gavinklfong.event.model.ShowItem;
-import space.gavinklfong.event.model.TicketItem;
-import space.gavinklfong.event.model.TicketStatus;
+import space.gavinklfong.theatre.model.ShowItem;
+import space.gavinklfong.theatre.model.TicketItem;
+import space.gavinklfong.theatre.model.TicketStatus;
 
 import java.time.LocalDateTime;
 import java.util.Map;

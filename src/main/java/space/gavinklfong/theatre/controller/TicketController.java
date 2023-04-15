@@ -1,13 +1,14 @@
-package space.gavinklfong.event.controller;
+package space.gavinklfong.theatre.controller;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import space.gavinklfong.event.dto.Show;
-import space.gavinklfong.event.dto.Ticket;
+import space.gavinklfong.theatre.dto.Show;
+import space.gavinklfong.theatre.dto.Ticket;
 
 import java.util.List;
-import java.util.Optional;
 
+@RequiredArgsConstructor
 @RestController
 public class TicketController {
 

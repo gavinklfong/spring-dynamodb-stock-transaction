@@ -1,40 +1,39 @@
-package space.gavinklfong.event.service;
+package space.gavinklfong.theatre.dao;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.RandomStringUtils;
-import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.junit.jupiter.api.Test;
-import space.gavinklfong.event.model.ShowItem;
-import space.gavinklfong.event.model.TicketItem;
-import space.gavinklfong.event.model.TicketStatus;
+import space.gavinklfong.theatre.model.ShowItem;
+import space.gavinklfong.theatre.model.TicketItem;
+import space.gavinklfong.theatre.model.TicketStatus;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.UUID;
 import java.util.stream.IntStream;
 
 @Slf4j
-class DynamoDBDaoTest {
+class DynamoDBTableBuilderTest {
+
+    private DynamoDBTableBuilder dynamoDBTableBuilder = new DynamoDBTableBuilder();
 
     private DynamoDBDao dynamoDBDao = new DynamoDBDao();
 
     @Test
     void createTable() {
-        dynamoDBDao.createTable();
+        dynamoDBTableBuilder.createTable();
     }
 
     @Test
-    void retrieveDataTest() {
-        ImmutablePair<ShowItem, List<TicketItem>> pair = dynamoDBDao.retrieveShowTickets("ed021707-743f-49d1-bb04-de6e7abdcdd2");
-        log.info("show: {}", pair.getLeft());
-        log.info("tickets: {}", pair.getRight());
+    void deleteTable() {
+        dynamoDBTableBuilder.deleteTable();
     }
+
 
     @Test
     void createSampleData() {
         String showId = UUID.randomUUID().toString();
         saveShow(showId, "ABBA Voyage", "ABBA Arena");
         IntStream.rangeClosed('A', 'C').forEach(rowId -> saveTicket(showId, (char)rowId + "1", TicketStatus.RESERVED));
+        IntStream.rangeClosed('E', 'G').forEach(rowId -> saveTicket(showId, (char)rowId + "1", TicketStatus.AVAILABLE));
     }
 
     private void saveShow(String showId, String name, String venue) {

@@ -1,4 +1,4 @@
-package space.gavinklfong.event.model;
+package space.gavinklfong.theatre.model;
 
 public enum SeatArea {
     BALCONY,
