@@ -6,6 +6,7 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.springframework.stereotype.Service;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 import software.amazon.awssdk.services.dynamodb.model.*;
+import space.gavinklfong.theatre.exception.TicketReservationException;
 import space.gavinklfong.theatre.model.ShowItem;
 import space.gavinklfong.theatre.model.TicketItem;
 import space.gavinklfong.theatre.model.TicketStatus;
@@ -61,7 +62,12 @@ public class DynamoDBDao {
                 .tableName(TABLE_NAME)
                 .build();
 
-        dynamoDbClient.updateItem(updateRequest);
+        try {
+            dynamoDbClient.updateItem(updateRequest);
+        } catch (ConditionalCheckFailedException e) {
+            throw new TicketReservationException();
+        }
+
     }
 
     public Optional<TicketItem> findTicketById(String showId, String ticketId) {

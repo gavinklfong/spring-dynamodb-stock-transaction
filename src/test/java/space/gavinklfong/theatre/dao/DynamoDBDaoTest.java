@@ -6,6 +6,7 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import software.amazon.awssdk.services.dynamodb.model.ResourceNotFoundException;
+import space.gavinklfong.theatre.exception.TicketReservationException;
 import space.gavinklfong.theatre.model.SeatArea;
 import space.gavinklfong.theatre.model.ShowItem;
 import space.gavinklfong.theatre.model.TicketItem;
@@ -16,9 +17,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-class DynamoDBDaoIntegrationTest {
+class DynamoDBDaoTest {
 
     private final DynamoDBTableBuilder dynamoDBTableBuilder = new DynamoDBTableBuilder(DynamoDBTestContainerSetup.DYNAMO_DB_CLIENT);
     private final DynamoDBDao dynamoDBDao = new DynamoDBDao(DynamoDBTestContainerSetup.DYNAMO_DB_CLIENT);
@@ -49,6 +52,26 @@ class DynamoDBDaoIntegrationTest {
         assertThat(retrievedShowItem)
                 .isPresent()
                 .hasValue(insertedShowItem);
+    }
+
+    @Test
+    void retrieveShowItem_notFound() {
+        Optional<ShowItem> retrievedShowItem = dynamoDBDao.findShowById(UUID.randomUUID().toString());
+        assertThat(retrievedShowItem).isNotPresent();
+    }
+
+    @Test
+    void retrieveTicketItem_notFound() {
+        Optional<TicketItem> retrievedTicketItem = dynamoDBDao.findTicketById(UUID.randomUUID().toString(), UUID.randomUUID().toString());
+        assertThat(retrievedTicketItem).isNotPresent();
+    }
+
+    @Test
+    void retrieveShowAndTicketItems_notFound() {
+        ImmutablePair<ShowItem, List<TicketItem>> showAndTickets = dynamoDBDao.findShowAndTicketsById(UUID.randomUUID().toString());
+
+        assertThat(showAndTickets).extracting(ImmutablePair::getRight).isEqualTo(emptyList());
+        assertThat(showAndTickets).extracting(ImmutablePair::getLeft).isEqualTo(ShowItem.builder().build());
     }
 
     @Test
@@ -138,6 +161,71 @@ class DynamoDBDaoIntegrationTest {
         assertThat(retievedTicketItem)
                 .isPresent()
                 .hasValue(insertedTicketItem2);
+    }
+
+    @Test
+    void reserveTicketItem() {
+        String showId = UUID.randomUUID().toString();
+        TicketItem insertedTicketItem1 = TicketItem.builder()
+                .price(RandomUtils.nextDouble(10, 1000))
+                .status(TicketStatus.AVAILABLE)
+                .area(SeatArea.BALCONY.name())
+                .sortKey(RandomStringUtils.randomAlphanumeric(3))
+                .showId(showId)
+                .build();
+
+        dynamoDBDao.saveTicket(insertedTicketItem1);
+
+        TicketItem insertedTicketItem2 = TicketItem.builder()
+                .price(RandomUtils.nextDouble(10, 1000))
+                .status(TicketStatus.RESERVED)
+                .ticketRef(UUID.randomUUID().toString())
+                .area(SeatArea.STALLS.name())
+                .sortKey(RandomStringUtils.randomAlphanumeric(3))
+                .showId(showId)
+                .build();
+
+        dynamoDBDao.saveTicket(insertedTicketItem2);
+
+        String ticketRef = UUID.randomUUID().toString();
+        dynamoDBDao.reserveTicket(insertedTicketItem1.getShowId(), insertedTicketItem1.getSortKey(), ticketRef);
+
+        Optional<TicketItem> retievedTicketItem = dynamoDBDao.findTicketByReference(
+                insertedTicketItem1.getShowId(), ticketRef);
+
+        assertThat(retievedTicketItem)
+                .isPresent()
+                .hasValue(insertedTicketItem1.toBuilder()
+                        .ticketRef(ticketRef)
+                        .status(TicketStatus.RESERVED)
+                        .build());
+    }
+
+    @Test
+    void reserveTicketItem_alreadyReserved() {
+        String showId = UUID.randomUUID().toString();
+        TicketItem insertedTicketItem = TicketItem.builder()
+                .price(RandomUtils.nextDouble(10, 1000))
+                .status(TicketStatus.RESERVED)
+                .ticketRef(UUID.randomUUID().toString())
+                .area(SeatArea.STALLS.name())
+                .sortKey(RandomStringUtils.randomAlphanumeric(3))
+                .showId(showId)
+                .build();
+
+        dynamoDBDao.saveTicket(insertedTicketItem);
+
+        String ticketRef = UUID.randomUUID().toString();
+        assertThrows(TicketReservationException.class,
+                () -> dynamoDBDao.reserveTicket(insertedTicketItem.getShowId(), insertedTicketItem.getSortKey(), ticketRef));
+    }
+
+
+    @Test
+    void reserveTicketItem_notFound() {
+        assertThrows(TicketReservationException.class,
+                () -> dynamoDBDao.reserveTicket(UUID.randomUUID().toString(), UUID.randomUUID().toString(),
+                        UUID.randomUUID().toString()));
     }
 
 }

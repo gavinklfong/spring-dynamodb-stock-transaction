@@ -10,11 +10,8 @@ import space.gavinklfong.theatre.model.ShowItem;
 import space.gavinklfong.theatre.model.TicketItem;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-
-import static java.util.stream.Collectors.groupingBy;
 
 @RequiredArgsConstructor
 @Service
@@ -38,10 +35,10 @@ public class ShowTicketService {
         return ImmutablePair.of(show, tickets);
     }
 
-    public Map<String, List<Ticket>> findTicketsGroupingByArea(String showId) {
+    public List<Ticket> findTickets(String showId) {
         return dynamoDBDao.findShowAndTicketsById(showId).getRight().stream()
                         .map(DynamoDBItemMapper.INSTANCE::mapFromItem)
-                .collect(groupingBy(Ticket::getArea));
+                .toList();
     }
 
     public String reserveTicket(String showId, String ticketId) {
