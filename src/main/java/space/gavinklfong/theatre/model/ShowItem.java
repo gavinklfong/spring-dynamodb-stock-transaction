@@ -4,32 +4,37 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbBean;
-import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbPartitionKey;
-import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbSortKey;
+import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Map;
 
-@DynamoDbBean
+import static software.amazon.awssdk.enhanced.dynamodb.internal.AttributeValues.numberValue;
+import static software.amazon.awssdk.enhanced.dynamodb.internal.AttributeValues.stringValue;
+import static space.gavinklfong.theatre.dao.DynamoDBTableConstant.SHOW_ITEM_SORT_KEY;
+
 @Builder
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class ShowItem {
     String showId;
-    String sortKey;
+    @Builder.Default
+    String sortKey = SHOW_ITEM_SORT_KEY;
     String name;
     LocalDateTime dateTime;
     Integer durationInMinute;
     String venue;
 
-    @DynamoDbPartitionKey
-    public void setShowId(String showId) {
-        this.showId = showId;
-    }
-
-    @DynamoDbSortKey
-    public void setSortKey(String sortKey) {
-        this.sortKey = sortKey;
+    public Map<String, AttributeValue> toAttributeValues() {
+        return Map.of(
+                "showId", stringValue(showId),
+                "sortKey", stringValue(sortKey),
+                "name", stringValue(name),
+                "dateTime", stringValue(DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(dateTime)),
+                "durationInMinute", numberValue(durationInMinute),
+                "venue", stringValue(venue)
+        );
     }
 }

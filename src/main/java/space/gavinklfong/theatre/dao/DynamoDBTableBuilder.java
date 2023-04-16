@@ -1,11 +1,8 @@
 package space.gavinklfong.theatre.dao;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-import software.amazon.awssdk.auth.credentials.ProfileCredentialsProvider;
 import software.amazon.awssdk.core.waiters.WaiterResponse;
-import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
-import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 import software.amazon.awssdk.services.dynamodb.model.*;
 import software.amazon.awssdk.services.dynamodb.waiters.DynamoDbWaiter;
@@ -16,17 +13,10 @@ import static space.gavinklfong.theatre.dao.DynamoDBTableConstant.TABLE_NAME;
 
 
 @Slf4j
-@Service
+@RequiredArgsConstructor
 public class DynamoDBTableBuilder {
 
-    private final DynamoDbClient dynamoDbClient = DynamoDbClient.builder()
-            .region(Region.US_EAST_2)
-            .credentialsProvider(ProfileCredentialsProvider.create())
-            .build();
-
-    private final DynamoDbEnhancedClient dynamoDbEnhancedClient = DynamoDbEnhancedClient.builder()
-            .dynamoDbClient(dynamoDbClient)
-            .build();
+    private final DynamoDbClient dynamoDbClient;
 
     public void deleteTable() {
 
@@ -82,19 +72,6 @@ public class DynamoDBTableBuilder {
                                         .keyType(KeyType.HASH)
                                         .build(),
                                 KeySchemaElement.builder()
-                                        .attributeName("status")
-                                        .keyType(KeyType.RANGE)
-                                        .build())
-                        .indexName("ticket-status-index")
-                        .projection(Projection.builder().projectionType(ProjectionType.ALL).build())
-                        .build(),
-                LocalSecondaryIndex.builder()
-                        .keySchema(
-                                KeySchemaElement.builder()
-                                        .attributeName("showId")
-                                        .keyType(KeyType.HASH)
-                                        .build(),
-                                KeySchemaElement.builder()
                                         .attributeName("ticketRef")
                                         .keyType(KeyType.RANGE)
                                         .build())
@@ -105,10 +82,6 @@ public class DynamoDBTableBuilder {
 
     private List<AttributeDefinition> buildAttributeDefinitions() {
         return List.of(
-                AttributeDefinition.builder()
-                .attributeName("status")
-                .attributeType(ScalarAttributeType.S)
-                .build(),
                 AttributeDefinition.builder()
                         .attributeName("ticketRef")
                         .attributeType(ScalarAttributeType.S)

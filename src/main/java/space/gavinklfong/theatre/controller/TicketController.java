@@ -5,12 +5,15 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import space.gavinklfong.theatre.dto.Show;
 import space.gavinklfong.theatre.dto.Ticket;
+import space.gavinklfong.theatre.service.ShowTicketService;
 
 import java.util.List;
 
 @RequiredArgsConstructor
 @RestController
 public class TicketController {
+
+    private final ShowTicketService showTicketService;
 
     @GetMapping("/shows/{showId}")
     public Show retrieveShows(@PathVariable String showId) {

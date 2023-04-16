@@ -4,11 +4,15 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbBean;
-import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbPartitionKey;
-import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbSortKey;
+import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
 
-@DynamoDbBean
+import java.util.HashMap;
+import java.util.Map;
+
+import static org.apache.commons.lang3.StringUtils.isEmpty;
+import static software.amazon.awssdk.enhanced.dynamodb.internal.AttributeValues.numberValue;
+import static software.amazon.awssdk.enhanced.dynamodb.internal.AttributeValues.stringValue;
+
 @Builder
 @Data
 @AllArgsConstructor
@@ -21,13 +25,17 @@ public class TicketItem {
     Double price;
     String ticketRef;
 
-    @DynamoDbPartitionKey
-    public void setShowId(String showId) {
-        this.showId = showId;
-    }
-
-    @DynamoDbSortKey
-    public void setSortKey(String sortKey) {
-        this.sortKey = sortKey;
+    public Map<String, AttributeValue> toAttributeValues() {
+        Map<String, AttributeValue> attributeValueMap = new HashMap<>(Map.of(
+                "showId", stringValue(showId),
+                "sortKey", stringValue(sortKey),
+                "status", stringValue(status.name()),
+                "area", stringValue(area),
+                "price", numberValue(price)
+        ));
+        if (!isEmpty(ticketRef)) {
+            attributeValueMap.put("ticketRef", stringValue(ticketRef));
+        }
+        return attributeValueMap;
     }
 }

@@ -15,6 +15,7 @@ public interface DynamoDBItemMapper {
 
     Show mapFromItem(ShowItem item);
 
+    @Mapping(target = "id", source = "sortKey")
     @Mapping(target = "reference", source = "ticketRef")
     Ticket mapFromItem(TicketItem item);
 }

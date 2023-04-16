@@ -36,6 +36,7 @@ public class DynamoItemMapper {
             case "ticketRef" -> builder.ticketRef(entry.getValue().s());
             case "status" -> builder.status(TicketStatus.valueOf(entry.getValue().s()));
             case "price" -> builder.price(Double.parseDouble(entry.getValue().n()));
+            case "area" -> builder.area(entry.getValue().s());
             default -> throw new IllegalArgumentException("unknown ticket item attribute: " + entry.getKey());
         }
     }
