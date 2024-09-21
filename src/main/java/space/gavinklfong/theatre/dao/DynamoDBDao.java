@@ -7,15 +7,15 @@ import org.springframework.stereotype.Service;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 import software.amazon.awssdk.services.dynamodb.model.*;
 import space.gavinklfong.theatre.exception.TicketReservationException;
+import space.gavinklfong.theatre.model.SeatArea;
 import space.gavinklfong.theatre.model.ShowItem;
 import space.gavinklfong.theatre.model.TicketItem;
 import space.gavinklfong.theatre.model.TicketStatus;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
+import static java.util.stream.Collectors.averagingDouble;
+import static java.util.stream.Collectors.groupingBy;
 import static software.amazon.awssdk.enhanced.dynamodb.internal.AttributeValues.stringValue;
 import static space.gavinklfong.theatre.dao.DynamoDBTableConstant.*;
 
@@ -44,6 +44,20 @@ public class DynamoDBDao {
         dynamoDbClient.putItem(putRequest);
     }
 
+    public void deleteTicket(TicketItem ticketItem) {
+        Map<String, AttributeValue> attrValues = Map.of(
+                ":showId", AttributeValue.builder().s(ticketItem.getShowId()).build(),
+                ":ticketId", AttributeValue.builder().s(ticketItem.getSortKey()).build()
+        );
+
+        DeleteItemRequest deleteItemRequest = DeleteItemRequest.builder()
+                .tableName(TABLE_NAME)
+                .key(attrValues)
+                .build();
+
+        dynamoDbClient.deleteItem(deleteItemRequest);
+    }
+
     public void reserveTicket(String showId, String ticketId, String ticketRef) {
 
         UpdateItemRequest updateRequest = UpdateItemRequest.builder()
@@ -69,6 +83,30 @@ public class DynamoDBDao {
         }
 
     }
+
+    public void reserveTickets(String showId, Set<String> ticketIds, String ticketRef) {
+
+    }
+
+    public Map<SeatArea, Double> findAverageTicketPriceBySeatArea(String showId) {
+        Map<String, AttributeValue> attrValues = Map.of(
+                ":showId", AttributeValue.builder().s(showId).build(),
+                ":sortKey", AttributeValue.builder().s("T").build()
+        );
+
+        QueryRequest queryReq = QueryRequest.builder()
+                .tableName(TABLE_NAME)
+                .keyConditionExpression("showId = :showId AND begins_with(sortKey, :sortKey)")
+                .expressionAttributeValues(attrValues)
+                .build();
+
+        QueryResponse response = dynamoDbClient.query(queryReq);
+
+        return response.items().stream()
+                .map(DynamoItemMapper::mapTicketItem)
+                .collect(groupingBy(TicketItem::getArea, averagingDouble(TicketItem::getPrice)));
+    }
+
 
     public Optional<TicketItem> findTicketById(String showId, String ticketId) {
         Map<String, AttributeValue> attrValues = Map.of(

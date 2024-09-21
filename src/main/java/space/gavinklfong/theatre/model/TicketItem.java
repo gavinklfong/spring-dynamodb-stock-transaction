@@ -21,7 +21,7 @@ public class TicketItem {
     String showId;
     String sortKey;
     TicketStatus status;
-    String area;
+    SeatArea area;
     Double price;
     String ticketRef;
 
@@ -30,7 +30,7 @@ public class TicketItem {
                 "showId", stringValue(showId),
                 "sortKey", stringValue(sortKey),
                 "status", stringValue(status.name()),
-                "area", stringValue(area),
+                "area", stringValue(area.name()),
                 "price", numberValue(price)
         ));
         if (!isEmpty(ticketRef)) {
