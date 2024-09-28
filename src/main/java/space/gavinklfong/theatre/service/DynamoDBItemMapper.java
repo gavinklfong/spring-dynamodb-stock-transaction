@@ -17,7 +17,6 @@ public interface DynamoDBItemMapper {
 
     Show mapFromItem(ShowItem item);
 
-//    @Mapping(target = "id", source = "sortKey")
     @Mapping(target = "id", expression = "java( item.getSortKey().substring(item.getSortKey().lastIndexOf(TICKET_PREFIX) + 1) )")
     @Mapping(target = "reference", source = "ticketRef")
     Ticket mapFromItem(TicketItem item);

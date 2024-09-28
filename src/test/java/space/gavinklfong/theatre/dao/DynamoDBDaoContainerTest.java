@@ -7,6 +7,7 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import software.amazon.awssdk.services.dynamodb.model.ResourceNotFoundException;
+import software.amazon.awssdk.services.dynamodb.model.TransactionCanceledException;
 import space.gavinklfong.theatre.exception.TicketReservationException;
 import space.gavinklfong.theatre.model.SeatArea;
 import space.gavinklfong.theatre.model.ShowItem;
@@ -14,13 +15,11 @@ import space.gavinklfong.theatre.model.TicketItem;
 import space.gavinklfong.theatre.model.TicketStatus;
 
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @Slf4j
@@ -171,6 +170,60 @@ class DynamoDBDaoContainerTest {
                         .ticketRef(ticketRef)
                         .status(TicketStatus.RESERVED)
                         .build());
+    }
+
+    @Test
+    void givenAllTicketAvailable_whenReserveMultipleTickets_thenTicketsReservedSuccessfully() {
+        String showId = UUID.randomUUID().toString();
+        String ticketRef = UUID.randomUUID().toString();
+
+        TicketItem availableTicket1 = insertTicketItem(showId, SeatArea.BALCONY, RandomUtils.nextDouble(10, 1000), TicketStatus.AVAILABLE);
+        TicketItem availableTicket2 = insertTicketItem(showId, SeatArea.BALCONY, RandomUtils.nextDouble(10, 1000), TicketStatus.AVAILABLE);
+
+        Set<String> ticketIds = Set.of(availableTicket1.getSortKey(), availableTicket2.getSortKey());
+
+        dynamoDBDao.reserveTickets(showId, ticketIds, ticketRef);
+
+        assertTicketReservedInDynamoDB(availableTicket1, ticketRef);
+        assertTicketReservedInDynamoDB(availableTicket2, ticketRef);
+    }
+
+    @Test
+    void givenOneTicketNotAvailable_whenReserveMultipleTickets_thenTransactionCanceled() {
+        String showId = UUID.randomUUID().toString();
+        String ticketRef = UUID.randomUUID().toString();
+
+        TicketItem availableTicket1 = insertTicketItem(showId, SeatArea.BALCONY, RandomUtils.nextDouble(10, 1000), TicketStatus.AVAILABLE);
+        TicketItem availableTicket2 = insertTicketItem(showId, SeatArea.BALCONY, RandomUtils.nextDouble(10, 1000), TicketStatus.AVAILABLE);
+        TicketItem reservedTicket1 = insertTicketItem(showId, SeatArea.BALCONY, RandomUtils.nextDouble(10, 1000), TicketStatus.RESERVED);
+
+        Set<String> ticketIds = Set.of(availableTicket1.getSortKey(), availableTicket2.getSortKey(), reservedTicket1.getSortKey());
+
+        assertThatThrownBy(() -> dynamoDBDao.reserveTickets(showId, ticketIds, ticketRef))
+                .isInstanceOf(TransactionCanceledException.class);
+
+        assertEqualTicketInDynamoDB(availableTicket1);
+        assertEqualTicketInDynamoDB(availableTicket2);
+        assertEqualTicketInDynamoDB(reservedTicket1);
+    }
+
+    private void assertTicketReservedInDynamoDB(TicketItem ticketItem, String ticketRef) {
+        Optional<TicketItem> retrievedTicketItem = dynamoDBDao.findTicketById(ticketItem.getShowId(), ticketItem.getSortKey());
+
+        assertThat(retrievedTicketItem)
+                .isPresent()
+                .hasValue(ticketItem.toBuilder()
+                        .ticketRef(ticketRef)
+                        .status(TicketStatus.RESERVED)
+                        .build());
+    }
+
+    private void assertEqualTicketInDynamoDB(TicketItem ticketItem) {
+        Optional<TicketItem> retrievedTicketItem = dynamoDBDao.findTicketById(ticketItem.getShowId(), ticketItem.getSortKey());
+
+        assertThat(retrievedTicketItem)
+                .isPresent()
+                .hasValue(ticketItem);
     }
 
     @Test

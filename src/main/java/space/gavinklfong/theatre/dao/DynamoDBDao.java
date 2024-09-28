@@ -60,21 +60,7 @@ public class DynamoDBDao {
 
     public void reserveTicket(String showId, String ticketId, String ticketRef) {
 
-        UpdateItemRequest updateRequest = UpdateItemRequest.builder()
-                .conditionExpression("#status = :expected_status")
-                .updateExpression("SET #status = :new_status, #ticketRef = :new_reference")
-                .expressionAttributeNames(Map.of(
-                        "#status", "status",
-                        "#ticketRef", "ticketRef"))
-                .expressionAttributeValues(Map.of(
-                        ":expected_status", stringValue(TicketStatus.AVAILABLE.name()),
-                        ":new_status", stringValue(TicketStatus.RESERVED.name()),
-                        ":new_reference", stringValue(ticketRef)
-                        ))
-                .key(Map.of("showId", stringValue(showId),
-                        "sortKey", stringValue(ticketId)))
-                .tableName(TABLE_NAME)
-                .build();
+        UpdateItemRequest updateRequest = createReserveTicketRequest(showId, ticketId, ticketRef);
 
         try {
             dynamoDbClient.updateItem(updateRequest);
@@ -84,8 +70,61 @@ public class DynamoDBDao {
 
     }
 
+    private UpdateItemRequest createReserveTicketRequest(String showId, String ticketId, String ticketRef) {
+        return UpdateItemRequest.builder()
+                .conditionExpression("#status = :expected_status")
+                .updateExpression("SET #status = :new_status, #ticketRef = :new_reference")
+                .expressionAttributeNames(Map.of(
+                        "#status", "status",
+                        "#ticketRef", "ticketRef"))
+                .expressionAttributeValues(Map.of(
+                        ":expected_status", stringValue(TicketStatus.AVAILABLE.name()),
+                        ":new_status", stringValue(TicketStatus.RESERVED.name()),
+                        ":new_reference", stringValue(ticketRef)
+                ))
+                .key(Map.of("showId", stringValue(showId),
+                        "sortKey", stringValue(ticketId)))
+                .tableName(TABLE_NAME)
+                .build();
+
+    }
+
     public void reserveTickets(String showId, Set<String> ticketIds, String ticketRef) {
 
+        List<TransactWriteItem> actions = ticketIds.stream()
+                .map(ticketId -> createTicketReservationUpdateRequest(showId, ticketId, ticketRef))
+                .map(this::wrapInTransactWriteItem)
+                .toList();
+
+        TransactWriteItemsRequest request = TransactWriteItemsRequest.builder()
+                .transactItems(actions)
+                .build();
+
+        dynamoDbClient.transactWriteItems(request);
+    }
+
+    private Update createTicketReservationUpdateRequest(String showId, String ticketId, String ticketRef) {
+        return Update.builder()
+                .conditionExpression("#status = :expected_status")
+                .updateExpression("SET #status = :new_status, #ticketRef = :new_reference")
+                .expressionAttributeNames(Map.of(
+                        "#status", "status",
+                        "#ticketRef", "ticketRef"))
+                .expressionAttributeValues(Map.of(
+                        ":expected_status", stringValue(TicketStatus.AVAILABLE.name()),
+                        ":new_status", stringValue(TicketStatus.RESERVED.name()),
+                        ":new_reference", stringValue(ticketRef)
+                ))
+                .key(Map.of("showId", stringValue(showId),
+                        "sortKey", stringValue(ticketId)))
+                .tableName(TABLE_NAME)
+                .build();
+    }
+
+    private TransactWriteItem wrapInTransactWriteItem(Update update) {
+        return TransactWriteItem.builder()
+                .update(update)
+                .build();
     }
 
     public Map<SeatArea, Double> findAverageTicketPriceBySeatArea(String showId) {
