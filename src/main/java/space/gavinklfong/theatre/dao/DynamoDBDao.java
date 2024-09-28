@@ -91,12 +91,12 @@ public class DynamoDBDao {
     public Map<SeatArea, Double> findAverageTicketPriceBySeatArea(String showId) {
         Map<String, AttributeValue> attrValues = Map.of(
                 ":showId", AttributeValue.builder().s(showId).build(),
-                ":sortKey", AttributeValue.builder().s("T").build()
+                ":ticketSortKeyPrefix", AttributeValue.builder().s(TICKET_ITEM_SORT_KEY_PREFIX).build()
         );
 
         QueryRequest queryReq = QueryRequest.builder()
                 .tableName(TABLE_NAME)
-                .keyConditionExpression("showId = :showId AND begins_with(sortKey, :sortKey)")
+                .keyConditionExpression("showId = :showId AND begins_with(sortKey, :ticketSortKeyPrefix)")
                 .expressionAttributeValues(attrValues)
                 .build();
 
@@ -186,9 +186,10 @@ public class DynamoDBDao {
 
         List<Map<String, AttributeValue>> items = response.items();
         for (Map<String, AttributeValue> item : items) {
-            if (SHOW_ITEM_SORT_KEY.equals(item.get("sortKey").s())) {
+            String sortKey = item.get("sortKey").s();
+            if (SHOW_ITEM_SORT_KEY.equals(sortKey)) {
                 showItem = DynamoItemMapper.mapShowItem(item);
-            } else {
+            } else if (sortKey.startsWith(TICKET_ITEM_SORT_KEY_PREFIX)) {
                 ticketItems.add(DynamoItemMapper.mapTicketItem(item));
             }
         }

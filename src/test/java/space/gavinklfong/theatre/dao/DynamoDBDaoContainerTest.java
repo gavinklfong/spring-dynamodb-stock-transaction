@@ -79,13 +79,9 @@ class DynamoDBDaoContainerTest {
 
     @Test
     void insertTicketItem() {
-        TicketItem insertedTicketItem = TicketItem.builder()
-                .price(RandomUtils.nextDouble(10, 1000))
-                .status(TicketStatus.AVAILABLE)
-                .area(SeatArea.BALCONY)
-                .sortKey(RandomStringUtils.randomAlphanumeric(3))
-                .showId(UUID.randomUUID().toString())
-                .build();
+
+        TicketItem insertedTicketItem = insertTicketItem(UUID.randomUUID().toString(), SeatArea.BALCONY,
+                RandomUtils.nextDouble(10, 1000), TicketStatus.AVAILABLE);
 
         dynamoDBDao.saveTicket(insertedTicketItem);
 
@@ -107,30 +103,12 @@ class DynamoDBDaoContainerTest {
 
         dynamoDBDao.saveShow(insertedShowItem);
 
-        TicketItem insertedTicketItem1 = TicketItem.builder()
-                .price(RandomUtils.nextDouble(10, 1000))
-                .status(TicketStatus.AVAILABLE)
-                .area(SeatArea.BALCONY)
-                .sortKey(RandomStringUtils.randomAlphanumeric(3))
-                .showId(showId)
-                .build();
-
-        dynamoDBDao.saveTicket(insertedTicketItem1);
-
-        TicketItem insertedTicketItem2 = TicketItem.builder()
-                .price(RandomUtils.nextDouble(10, 1000))
-                .status(TicketStatus.RESERVED)
-                .ticketRef(UUID.randomUUID().toString())
-                .area(SeatArea.STALLS)
-                .sortKey(RandomStringUtils.randomAlphanumeric(3))
-                .showId(showId)
-                .build();
-
-        dynamoDBDao.saveTicket(insertedTicketItem2);
+        TicketItem insertedTicketItem1 = insertTicketItem(showId, SeatArea.BALCONY, RandomUtils.nextDouble(10, 1000), TicketStatus.AVAILABLE);
+        TicketItem insertedTicketItem2 = insertTicketItem(showId, SeatArea.STALLS, RandomUtils.nextDouble(10, 1000), TicketStatus.RESERVED);
 
         ImmutablePair<ShowItem, List<TicketItem>> showAndTickets = dynamoDBDao.findShowAndTicketsById(insertedTicketItem1.getShowId());
 
-        assertThat(showAndTickets).extracting(ImmutablePair::getRight).isEqualTo(List.of(insertedTicketItem1, insertedTicketItem2));
+        assertThat(showAndTickets.getRight()).containsExactlyInAnyOrderElementsOf(List.of(insertedTicketItem1, insertedTicketItem2));
         assertThat(showAndTickets).extracting(ImmutablePair::getLeft).isEqualTo(insertedShowItem);
     }
 
@@ -163,26 +141,9 @@ class DynamoDBDaoContainerTest {
     @Test
     void retrieveTicketItemByReference() {
         String showId = UUID.randomUUID().toString();
-        TicketItem insertedTicketItem1 = TicketItem.builder()
-                .price(RandomUtils.nextDouble(10, 1000))
-                .status(TicketStatus.AVAILABLE)
-                .area(SeatArea.BALCONY)
-                .sortKey(RandomStringUtils.randomAlphanumeric(3))
-                .showId(showId)
-                .build();
 
-        dynamoDBDao.saveTicket(insertedTicketItem1);
-
-        TicketItem insertedTicketItem2 = TicketItem.builder()
-                .price(RandomUtils.nextDouble(10, 1000))
-                .status(TicketStatus.RESERVED)
-                .ticketRef(UUID.randomUUID().toString())
-                .area(SeatArea.STALLS)
-                .sortKey(RandomStringUtils.randomAlphanumeric(3))
-                .showId(showId)
-                .build();
-
-        dynamoDBDao.saveTicket(insertedTicketItem2);
+        TicketItem insertedTicketItem1 = insertTicketItem(showId, SeatArea.BALCONY, RandomUtils.nextDouble(10, 1000), TicketStatus.AVAILABLE);
+        TicketItem insertedTicketItem2 = insertTicketItem(showId, SeatArea.STALLS, RandomUtils.nextDouble(10, 1000), TicketStatus.RESERVED, UUID.randomUUID().toString());
 
         Optional<TicketItem> retievedTicketItem = dynamoDBDao.findTicketByReference(
                 insertedTicketItem2.getShowId(), insertedTicketItem2.getTicketRef());
@@ -195,36 +156,18 @@ class DynamoDBDaoContainerTest {
     @Test
     void reserveTicketItem() {
         String showId = UUID.randomUUID().toString();
-        TicketItem insertedTicketItem1 = TicketItem.builder()
-                .price(RandomUtils.nextDouble(10, 1000))
-                .status(TicketStatus.AVAILABLE)
-                .area(SeatArea.BALCONY)
-                .sortKey(RandomStringUtils.randomAlphanumeric(3))
-                .showId(showId)
-                .build();
-
-        dynamoDBDao.saveTicket(insertedTicketItem1);
-
-        TicketItem insertedTicketItem2 = TicketItem.builder()
-                .price(RandomUtils.nextDouble(10, 1000))
-                .status(TicketStatus.RESERVED)
-                .ticketRef(UUID.randomUUID().toString())
-                .area(SeatArea.STALLS)
-                .sortKey(RandomStringUtils.randomAlphanumeric(3))
-                .showId(showId)
-                .build();
-
-        dynamoDBDao.saveTicket(insertedTicketItem2);
+        TicketItem availableTicket = insertTicketItem(showId, SeatArea.BALCONY, RandomUtils.nextDouble(10, 1000), TicketStatus.AVAILABLE);
+        TicketItem reservedTicket = insertTicketItem(showId, SeatArea.STALLS, RandomUtils.nextDouble(10, 1000), TicketStatus.RESERVED, UUID.randomUUID().toString());
 
         String ticketRef = UUID.randomUUID().toString();
-        dynamoDBDao.reserveTicket(insertedTicketItem1.getShowId(), insertedTicketItem1.getSortKey(), ticketRef);
+        dynamoDBDao.reserveTicket(availableTicket.getShowId(), availableTicket.getSortKey(), ticketRef);
 
-        Optional<TicketItem> retievedTicketItem = dynamoDBDao.findTicketByReference(
-                insertedTicketItem1.getShowId(), ticketRef);
+        Optional<TicketItem> retrievedTicketItem = dynamoDBDao.findTicketByReference(
+                availableTicket.getShowId(), ticketRef);
 
-        assertThat(retievedTicketItem)
+        assertThat(retrievedTicketItem)
                 .isPresent()
-                .hasValue(insertedTicketItem1.toBuilder()
+                .hasValue(availableTicket.toBuilder()
                         .ticketRef(ticketRef)
                         .status(TicketStatus.RESERVED)
                         .build());
@@ -256,16 +199,23 @@ class DynamoDBDaoContainerTest {
                         UUID.randomUUID().toString()));
     }
 
-    private void insertTicketItem(String showId, SeatArea seatArea, double price, TicketStatus ticketStatus) {
+    private TicketItem insertTicketItem(String showId, SeatArea seatArea, double price, TicketStatus ticketStatus) {
+        return insertTicketItem(showId, seatArea, price, ticketStatus, null);
+    }
+
+    private TicketItem insertTicketItem(String showId, SeatArea seatArea, double price, TicketStatus ticketStatus, String ticketRef) {
         TicketItem insertedTicketItem = TicketItem.builder()
                 .price(price)
                 .status(ticketStatus)
                 .area(seatArea)
-                .sortKey(String.format("T%s", RandomStringUtils.randomAlphanumeric(3)))
+                .sortKey(String.format("TICKET#%s", RandomStringUtils.randomAlphanumeric(3).toUpperCase()))
                 .showId(showId)
+                .ticketRef(ticketRef)
                 .build();
 
         dynamoDBDao.saveTicket(insertedTicketItem);
+
+        return insertedTicketItem;
     }
 
 }

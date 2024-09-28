@@ -4,4 +4,5 @@ public interface DynamoDBTableConstant {
     String TABLE_NAME = "theatre-ticket";
     String TICKET_REF_INDEX = "ticket-ref-index";
     String SHOW_ITEM_SORT_KEY = "SHOW";
+    String TICKET_ITEM_SORT_KEY_PREFIX = "TICKET#";
 }
