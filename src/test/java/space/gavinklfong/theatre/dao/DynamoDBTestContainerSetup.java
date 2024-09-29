@@ -17,7 +17,7 @@ public class DynamoDBTestContainerSetup {
 
     static {
         DYNAMODB_CONTAINER = new GenericContainer(DockerImageName.parse("amazon/dynamodb-local:latest"))
-                .withCommand(new String[]{"-jar", "DynamoDBLocal.jar", "-sharedDb"})
+                .withCommand("-jar", "DynamoDBLocal.jar", "-sharedDb")
                 .withExposedPorts(8000)
                 .withLogConsumer(new Slf4jLogConsumer((LoggerFactory.getLogger(DynamoDBTestContainerSetup.class))));
         DYNAMODB_CONTAINER.start();

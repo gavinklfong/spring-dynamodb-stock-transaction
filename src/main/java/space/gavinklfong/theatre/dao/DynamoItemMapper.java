@@ -1,6 +1,7 @@
 package space.gavinklfong.theatre.dao;
 
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
+import space.gavinklfong.theatre.model.SeatArea;
 import space.gavinklfong.theatre.model.ShowItem;
 import space.gavinklfong.theatre.model.TicketItem;
 import space.gavinklfong.theatre.model.TicketStatus;
@@ -36,7 +37,7 @@ public class DynamoItemMapper {
             case "ticketRef" -> builder.ticketRef(entry.getValue().s());
             case "status" -> builder.status(TicketStatus.valueOf(entry.getValue().s()));
             case "price" -> builder.price(Double.parseDouble(entry.getValue().n()));
-            case "area" -> builder.area(entry.getValue().s());
+            case "area" -> builder.area(SeatArea.valueOf(entry.getValue().s()));
             default -> throw new IllegalArgumentException("unknown ticket item attribute: " + entry.getKey());
         }
     }

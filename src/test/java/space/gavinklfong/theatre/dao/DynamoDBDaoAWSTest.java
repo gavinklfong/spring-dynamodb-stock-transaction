@@ -5,6 +5,8 @@ import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 import software.amazon.awssdk.services.dynamodb.model.ResourceNotFoundException;
 import space.gavinklfong.theatre.exception.TicketReservationException;
 import space.gavinklfong.theatre.model.SeatArea;
@@ -21,19 +23,22 @@ import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-class DynamoDBDaoTest {
+class DynamoDBDaoAWSTest {
 
-    private final DynamoDBTableBuilder dynamoDBTableBuilder = new DynamoDBTableBuilder(DynamoDBTestContainerSetup.DYNAMO_DB_CLIENT);
-    private final DynamoDBDao dynamoDBDao = new DynamoDBDao(DynamoDBTestContainerSetup.DYNAMO_DB_CLIENT);
+//    private final DynamoDBTableBuilder dynamoDBTableBuilder = new DynamoDBTableBuilder(DynamoDBTestContainerSetup.DYNAMO_DB_CLIENT);
+    private final DynamoDBDao dynamoDBDao = new DynamoDBDao(
+            DynamoDbClient.builder()
+            .region(Region.US_EAST_2)
+                .build());
 
-    @BeforeEach
-    void setUp() {
-        try {
-            dynamoDBTableBuilder.deleteTable();
-        } catch (ResourceNotFoundException e) {}
-
-        dynamoDBTableBuilder.createTable();
-    }
+//    @BeforeEach
+//    void setUp() {
+//        try {
+//            dynamoDBTableBuilder.deleteTable();
+//        } catch (ResourceNotFoundException e) {}
+//
+//        dynamoDBTableBuilder.createTable();
+//    }
 
     @Test
     void insertShowItem() {
@@ -79,7 +84,7 @@ class DynamoDBDaoTest {
         TicketItem insertedTicketItem = TicketItem.builder()
                 .price(RandomUtils.nextDouble(10, 1000))
                 .status(TicketStatus.AVAILABLE)
-                .area(SeatArea.BALCONY.name())
+                .area(SeatArea.BALCONY)
                 .sortKey(RandomStringUtils.randomAlphanumeric(3))
                 .showId(UUID.randomUUID().toString())
                 .build();
@@ -107,7 +112,7 @@ class DynamoDBDaoTest {
         TicketItem insertedTicketItem1 = TicketItem.builder()
                 .price(RandomUtils.nextDouble(10, 1000))
                 .status(TicketStatus.AVAILABLE)
-                .area(SeatArea.BALCONY.name())
+                .area(SeatArea.BALCONY)
                 .sortKey(RandomStringUtils.randomAlphanumeric(3))
                 .showId(showId)
                 .build();
@@ -118,7 +123,7 @@ class DynamoDBDaoTest {
                 .price(RandomUtils.nextDouble(10, 1000))
                 .status(TicketStatus.RESERVED)
                 .ticketRef(UUID.randomUUID().toString())
-                .area(SeatArea.STALLS.name())
+                .area(SeatArea.STALLS)
                 .sortKey(RandomStringUtils.randomAlphanumeric(3))
                 .showId(showId)
                 .build();
@@ -137,7 +142,7 @@ class DynamoDBDaoTest {
         TicketItem insertedTicketItem1 = TicketItem.builder()
                 .price(RandomUtils.nextDouble(10, 1000))
                 .status(TicketStatus.AVAILABLE)
-                .area(SeatArea.BALCONY.name())
+                .area(SeatArea.BALCONY)
                 .sortKey(RandomStringUtils.randomAlphanumeric(3))
                 .showId(showId)
                 .build();
@@ -148,7 +153,7 @@ class DynamoDBDaoTest {
                 .price(RandomUtils.nextDouble(10, 1000))
                 .status(TicketStatus.RESERVED)
                 .ticketRef(UUID.randomUUID().toString())
-                .area(SeatArea.STALLS.name())
+                .area(SeatArea.STALLS)
                 .sortKey(RandomStringUtils.randomAlphanumeric(3))
                 .showId(showId)
                 .build();
@@ -169,7 +174,7 @@ class DynamoDBDaoTest {
         TicketItem insertedTicketItem1 = TicketItem.builder()
                 .price(RandomUtils.nextDouble(10, 1000))
                 .status(TicketStatus.AVAILABLE)
-                .area(SeatArea.BALCONY.name())
+                .area(SeatArea.BALCONY)
                 .sortKey(RandomStringUtils.randomAlphanumeric(3))
                 .showId(showId)
                 .build();
@@ -180,7 +185,7 @@ class DynamoDBDaoTest {
                 .price(RandomUtils.nextDouble(10, 1000))
                 .status(TicketStatus.RESERVED)
                 .ticketRef(UUID.randomUUID().toString())
-                .area(SeatArea.STALLS.name())
+                .area(SeatArea.STALLS)
                 .sortKey(RandomStringUtils.randomAlphanumeric(3))
                 .showId(showId)
                 .build();
@@ -208,7 +213,7 @@ class DynamoDBDaoTest {
                 .price(RandomUtils.nextDouble(10, 1000))
                 .status(TicketStatus.RESERVED)
                 .ticketRef(UUID.randomUUID().toString())
-                .area(SeatArea.STALLS.name())
+                .area(SeatArea.STALLS)
                 .sortKey(RandomStringUtils.randomAlphanumeric(3))
                 .showId(showId)
                 .build();
