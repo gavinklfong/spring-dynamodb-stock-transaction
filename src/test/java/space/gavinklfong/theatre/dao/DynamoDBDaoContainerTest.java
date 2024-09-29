@@ -183,12 +183,14 @@ class DynamoDBDaoContainerTest {
 
         Set<String> ticketIds = Set.of(availableTicket1.getSortKey(), availableTicket2.getSortKey());
 
-        dynamoDBDao.reserveTickets(showId, ticketIds, ticketRef, "request-token-1");
+        String requestToken = RandomStringUtils.randomAlphanumeric(30).toUpperCase();
+
+        dynamoDBDao.reserveTickets(showId, ticketIds, ticketRef, requestToken);
 
         assertTicketReservedInDynamoDB(availableTicket1, ticketRef);
         assertTicketReservedInDynamoDB(availableTicket2, ticketRef);
 
-        dynamoDBDao.reserveTickets(showId, ticketIds, ticketRef, "request-token-1");
+        dynamoDBDao.reserveTickets(showId, ticketIds, ticketRef, requestToken);
 
         assertTicketReservedInDynamoDB(availableTicket1, ticketRef);
         assertTicketReservedInDynamoDB(availableTicket2, ticketRef);
@@ -224,12 +226,14 @@ class DynamoDBDaoContainerTest {
 
         Set<String> ticketIds = Set.of(availableTicket1.getSortKey(), availableTicket2.getSortKey());
 
-        dynamoDBDao.reserveTickets(showId, ticketIds, ticketRef, "request-token-1");
+        String requestToken1 = RandomStringUtils.randomAlphanumeric(30).toUpperCase();
+        dynamoDBDao.reserveTickets(showId, ticketIds, ticketRef, requestToken1);
 
         assertTicketReservedInDynamoDB(availableTicket1, ticketRef);
         assertTicketReservedInDynamoDB(availableTicket2, ticketRef);
 
-        assertThatThrownBy(() -> dynamoDBDao.reserveTickets(showId, ticketIds, ticketRef, "request-token-2"))
+        String requestToken2 = RandomStringUtils.randomAlphanumeric(30).toUpperCase();
+        assertThatThrownBy(() -> dynamoDBDao.reserveTickets(showId, ticketIds, ticketRef, requestToken2))
                 .isInstanceOf(TransactionCanceledException.class);
     }
 

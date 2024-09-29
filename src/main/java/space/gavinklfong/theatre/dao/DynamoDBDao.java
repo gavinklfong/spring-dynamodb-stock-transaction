@@ -2,6 +2,7 @@ package space.gavinklfong.theatre.dao;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.springframework.stereotype.Service;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
@@ -106,25 +107,7 @@ public class DynamoDBDao {
     }
 
     public void reserveTickets(String showId, Set<String> ticketIds, String ticketRef) {
-
-        List<TransactWriteItem> actions = ticketIds.stream()
-                .map(ticketId -> createTicketReservationUpdateRequest(showId, ticketId, ticketRef))
-                .map(this::wrapInTransactWriteItem)
-                .toList();
-
-        TransactWriteItemsRequest request = TransactWriteItemsRequest.builder()
-                .clientRequestToken(createRequestToken(showId, ticketIds))
-                .transactItems(actions)
-                .build();
-
-        dynamoDbClient.transactWriteItems(request);
-    }
-
-    private String createRequestToken(String showId, Set<String> ticketIds) {
-        String sortedTicketIds = ticketIds.stream()
-                .sorted()
-                .collect(Collectors.joining("-"));
-        return String.format("%s-%s", showId, sortedTicketIds);
+        reserveTickets(showId, ticketIds, ticketRef, RandomStringUtils.randomAlphanumeric(30).toUpperCase());
     }
 
     private Update createTicketReservationUpdateRequest(String showId, String ticketId, String ticketRef) {
