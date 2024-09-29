@@ -13,6 +13,7 @@ import space.gavinklfong.theatre.model.TicketItem;
 import space.gavinklfong.theatre.model.TicketStatus;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.averagingDouble;
 import static java.util.stream.Collectors.groupingBy;
@@ -89,6 +90,21 @@ public class DynamoDBDao {
 
     }
 
+    public void reserveTickets(String showId, Set<String> ticketIds, String ticketRef, String requestToken) {
+
+        List<TransactWriteItem> actions = ticketIds.stream()
+                .map(ticketId -> createTicketReservationUpdateRequest(showId, ticketId, ticketRef))
+                .map(this::wrapInTransactWriteItem)
+                .toList();
+
+        TransactWriteItemsRequest request = TransactWriteItemsRequest.builder()
+                .clientRequestToken(requestToken)
+                .transactItems(actions)
+                .build();
+
+        dynamoDbClient.transactWriteItems(request);
+    }
+
     public void reserveTickets(String showId, Set<String> ticketIds, String ticketRef) {
 
         List<TransactWriteItem> actions = ticketIds.stream()
@@ -97,10 +113,18 @@ public class DynamoDBDao {
                 .toList();
 
         TransactWriteItemsRequest request = TransactWriteItemsRequest.builder()
+                .clientRequestToken(createRequestToken(showId, ticketIds))
                 .transactItems(actions)
                 .build();
 
         dynamoDbClient.transactWriteItems(request);
+    }
+
+    private String createRequestToken(String showId, Set<String> ticketIds) {
+        String sortedTicketIds = ticketIds.stream()
+                .sorted()
+                .collect(Collectors.joining("-"));
+        return String.format("%s-%s", showId, sortedTicketIds);
     }
 
     private Update createTicketReservationUpdateRequest(String showId, String ticketId, String ticketRef) {

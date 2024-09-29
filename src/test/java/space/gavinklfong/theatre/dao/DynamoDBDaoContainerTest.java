@@ -6,6 +6,7 @@ import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import software.amazon.awssdk.services.dynamodb.model.IdempotentParameterMismatchException;
 import software.amazon.awssdk.services.dynamodb.model.ResourceNotFoundException;
 import software.amazon.awssdk.services.dynamodb.model.TransactionCanceledException;
 import space.gavinklfong.theatre.exception.TicketReservationException;
@@ -173,6 +174,66 @@ class DynamoDBDaoContainerTest {
     }
 
     @Test
+    void givenSameTokenForSameRequest_whenReserveMultipleTickets_thenTicketsReservedSuccessfully() {
+        String showId = UUID.randomUUID().toString();
+        String ticketRef = UUID.randomUUID().toString();
+
+        TicketItem availableTicket1 = insertTicketItem(showId, SeatArea.BALCONY, RandomUtils.nextDouble(10, 1000), TicketStatus.AVAILABLE);
+        TicketItem availableTicket2 = insertTicketItem(showId, SeatArea.BALCONY, RandomUtils.nextDouble(10, 1000), TicketStatus.AVAILABLE);
+
+        Set<String> ticketIds = Set.of(availableTicket1.getSortKey(), availableTicket2.getSortKey());
+
+        dynamoDBDao.reserveTickets(showId, ticketIds, ticketRef, "request-token-1");
+
+        assertTicketReservedInDynamoDB(availableTicket1, ticketRef);
+        assertTicketReservedInDynamoDB(availableTicket2, ticketRef);
+
+        dynamoDBDao.reserveTickets(showId, ticketIds, ticketRef, "request-token-1");
+
+        assertTicketReservedInDynamoDB(availableTicket1, ticketRef);
+        assertTicketReservedInDynamoDB(availableTicket2, ticketRef);
+    }
+
+    @Test
+    void givenSameTokenForDifferentRequest_whenReserveMultipleTickets_thenTicketsReservedSuccessfully() {
+        String showId = UUID.randomUUID().toString();
+        String ticketRef = UUID.randomUUID().toString();
+
+        TicketItem availableTicket1 = insertTicketItem(showId, SeatArea.BALCONY, RandomUtils.nextDouble(10, 1000), TicketStatus.AVAILABLE);
+        TicketItem availableTicket2 = insertTicketItem(showId, SeatArea.BALCONY, RandomUtils.nextDouble(10, 1000), TicketStatus.AVAILABLE);
+        TicketItem availableTicket3 = insertTicketItem(showId, SeatArea.BALCONY, RandomUtils.nextDouble(10, 1000), TicketStatus.AVAILABLE);
+
+        dynamoDBDao.reserveTickets(showId, Set.of(availableTicket1.getSortKey(), availableTicket2.getSortKey()), ticketRef, "request-token-1");
+
+        assertTicketReservedInDynamoDB(availableTicket1, ticketRef);
+        assertTicketReservedInDynamoDB(availableTicket2, ticketRef);
+
+        assertThatThrownBy(() -> dynamoDBDao.reserveTickets(showId, Set.of(availableTicket3.getSortKey()), ticketRef, "request-token-1"))
+                .isInstanceOf(IdempotentParameterMismatchException.class);
+
+        assertEqualTicketInDynamoDB(availableTicket3);
+    }
+
+    @Test
+    void givenDifferentTokenForSameRequest_whenReserveMultipleTickets_thenTicketsReservedSuccessfully() {
+        String showId = UUID.randomUUID().toString();
+        String ticketRef = UUID.randomUUID().toString();
+
+        TicketItem availableTicket1 = insertTicketItem(showId, SeatArea.BALCONY, RandomUtils.nextDouble(10, 1000), TicketStatus.AVAILABLE);
+        TicketItem availableTicket2 = insertTicketItem(showId, SeatArea.BALCONY, RandomUtils.nextDouble(10, 1000), TicketStatus.AVAILABLE);
+
+        Set<String> ticketIds = Set.of(availableTicket1.getSortKey(), availableTicket2.getSortKey());
+
+        dynamoDBDao.reserveTickets(showId, ticketIds, ticketRef, "request-token-1");
+
+        assertTicketReservedInDynamoDB(availableTicket1, ticketRef);
+        assertTicketReservedInDynamoDB(availableTicket2, ticketRef);
+
+        assertThatThrownBy(() -> dynamoDBDao.reserveTickets(showId, ticketIds, ticketRef, "request-token-2"))
+                .isInstanceOf(TransactionCanceledException.class);
+    }
+
+    @Test
     void givenAllTicketAvailable_whenReserveMultipleTickets_thenTicketsReservedSuccessfully() {
         String showId = UUID.randomUUID().toString();
         String ticketRef = UUID.randomUUID().toString();
@@ -217,6 +278,7 @@ class DynamoDBDaoContainerTest {
                         .status(TicketStatus.RESERVED)
                         .build());
     }
+
 
     private void assertEqualTicketInDynamoDB(TicketItem ticketItem) {
         Optional<TicketItem> retrievedTicketItem = dynamoDBDao.findTicketById(ticketItem.getShowId(), ticketItem.getSortKey());
