@@ -1,4 +1,4 @@
-package space.gavinklfong.theatre.model;
+package space.gavinklfong.stock.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -12,7 +12,7 @@ import java.util.Map;
 
 import static software.amazon.awssdk.enhanced.dynamodb.internal.AttributeValues.numberValue;
 import static software.amazon.awssdk.enhanced.dynamodb.internal.AttributeValues.stringValue;
-import static space.gavinklfong.theatre.dao.DynamoDBTableConstant.SHOW_ITEM_SORT_KEY;
+import static space.gavinklfong.stock.dao.DynamoDBTableConstant.SHOW_ITEM_SORT_KEY;
 
 @Builder
 @Data

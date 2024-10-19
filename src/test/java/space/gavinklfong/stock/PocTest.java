@@ -1,4 +1,4 @@
-package space.gavinklfong.theatre;
+package space.gavinklfong.stock;
 
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
@@ -12,12 +12,16 @@ public class PocTest {
 
     @Test
     void test() {
-        Instant instant = Instant.parse("2024-10-01T09:35:26.2837Z");
+        Instant instant = Instant.parse("2024-10-01T09:35:26.283Z");
         log.info("{}", instant.getNano());
         log.info("{}", instant.getEpochSecond());
 
         log.info("{}", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSS")
                         .withZone(ZoneId.systemDefault())
+                .format(instant));
+
+        log.info("{}", DateTimeFormatter.ISO_INSTANT
+//                .withZone(ZoneId.systemDefault())
                 .format(instant));
     }
 }

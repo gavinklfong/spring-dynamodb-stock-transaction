@@ -7,6 +7,7 @@ import space.gavinklfong.stock.dao.DynamoDBDao;
 import space.gavinklfong.stock.dto.Show;
 import space.gavinklfong.stock.dto.Ticket;
 import space.gavinklfong.stock.model.ShowItem;
+import space.gavinklfong.stock.model.StockTransaction;
 import space.gavinklfong.stock.model.TicketItem;
 
 import java.util.List;
@@ -15,40 +16,15 @@ import java.util.UUID;
 
 @RequiredArgsConstructor
 @Service
-public class ShowTicketService {
+public class StockService {
 
     private final DynamoDBDao dynamoDBDao;
 
-    public Optional<Show> findTheatreShow(String showId) {
-        return dynamoDBDao.findShowById(showId)
-                .map(DynamoDBItemMapper.INSTANCE::mapFromItem);
+    public List<StockTransaction> findStockTransactions(String accountNumber) {
+        return dynamoDBDao.findStockTransactionByAccountNumber(accountNumber);
     }
 
-    public ImmutablePair<Show, List<Ticket>> findTheatreShowAndTickets(String showId) {
-        ImmutablePair<ShowItem, List<TicketItem>> result = dynamoDBDao.findShowAndTicketsById(showId);
-         List<Ticket> tickets = result.getRight().stream()
-                .map(DynamoDBItemMapper.INSTANCE::mapFromItem)
-                 .toList();
-
-         Show show = DynamoDBItemMapper.INSTANCE.mapFromItem(result.getLeft());
-
-        return ImmutablePair.of(show, tickets);
-    }
-
-    public List<Ticket> findTickets(String showId) {
-        return dynamoDBDao.findShowAndTicketsById(showId).getRight().stream()
-                        .map(DynamoDBItemMapper.INSTANCE::mapFromItem)
-                .toList();
-    }
-
-    public String reserveTicket(String showId, String ticketId) {
-        String ticketRef = UUID.randomUUID().toString();
-        dynamoDBDao.reserveTicket(showId, ticketId, ticketRef);
-        return ticketRef;
-    }
-
-    public Optional<Ticket> findTicketByReference(String showId, String reference) {
-        return dynamoDBDao.findTicketByReference(showId, reference)
-                .map(DynamoDBItemMapper.INSTANCE::mapFromItem);
+    public void saveStockTransaction(StockTransaction stockTransaction) {
+        dynamoDBDao.saveStockTransaction(stockTransaction);
     }
 }

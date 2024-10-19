@@ -1,4 +1,4 @@
-package space.gavinklfong.theatre.dao;
+package space.gavinklfong.stock.dao;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -9,7 +9,7 @@ import software.amazon.awssdk.services.dynamodb.waiters.DynamoDbWaiter;
 
 import java.util.List;
 
-import static space.gavinklfong.theatre.dao.DynamoDBTableConstant.TABLE_NAME;
+import static space.gavinklfong.stock.dao.DynamoDBTableConstant.TABLE_NAME;
 
 
 @Slf4j

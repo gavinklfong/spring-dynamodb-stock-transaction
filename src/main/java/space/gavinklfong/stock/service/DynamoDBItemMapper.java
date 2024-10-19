@@ -1,12 +1,12 @@
-package space.gavinklfong.theatre.service;
+package space.gavinklfong.stock.service;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
-import space.gavinklfong.theatre.dto.Show;
-import space.gavinklfong.theatre.dto.Ticket;
-import space.gavinklfong.theatre.model.ShowItem;
-import space.gavinklfong.theatre.model.TicketItem;
+import space.gavinklfong.stock.dto.Show;
+import space.gavinklfong.stock.dto.Ticket;
+import space.gavinklfong.stock.model.ShowItem;
+import space.gavinklfong.stock.model.TicketItem;
 
 @Mapper
 public interface DynamoDBItemMapper {

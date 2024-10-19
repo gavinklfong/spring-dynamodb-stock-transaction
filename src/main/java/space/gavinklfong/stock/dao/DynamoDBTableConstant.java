@@ -1,8 +1,6 @@
-package space.gavinklfong.theatre.dao;
+package space.gavinklfong.stock.dao;
 
 public interface DynamoDBTableConstant {
-    String TABLE_NAME = "theatre-ticket";
-    String TICKET_REF_INDEX = "ticket-ref-index";
+    String TABLE_NAME = "stock-transaction";
     String SHOW_ITEM_SORT_KEY = "SHOW";
-    String TICKET_ITEM_SORT_KEY_PREFIX = "TICKET#";
 }

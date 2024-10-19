@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import java.util.NoSuchElementException;
 
 @ControllerAdvice
-public class TicketControllerAdvice {
+public class StockControllerAdvice {
 
     @ResponseStatus(HttpStatus.NOT_FOUND)
     @ExceptionHandler(NoSuchElementException.class)

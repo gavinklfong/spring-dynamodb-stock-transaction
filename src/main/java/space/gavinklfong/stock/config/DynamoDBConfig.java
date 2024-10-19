@@ -1,4 +1,4 @@
-package space.gavinklfong.theatre.config;
+package space.gavinklfong.stock.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

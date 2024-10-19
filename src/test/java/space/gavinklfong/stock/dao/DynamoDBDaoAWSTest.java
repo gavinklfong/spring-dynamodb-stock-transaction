@@ -1,18 +1,16 @@
-package space.gavinklfong.theatre.dao;
+package space.gavinklfong.stock.dao;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
-import software.amazon.awssdk.services.dynamodb.model.ResourceNotFoundException;
-import space.gavinklfong.theatre.exception.TicketReservationException;
-import space.gavinklfong.theatre.model.SeatArea;
-import space.gavinklfong.theatre.model.ShowItem;
-import space.gavinklfong.theatre.model.TicketItem;
-import space.gavinklfong.theatre.model.TicketStatus;
+import space.gavinklfong.stock.exception.TicketReservationException;
+import space.gavinklfong.stock.model.SeatArea;
+import space.gavinklfong.stock.model.ShowItem;
+import space.gavinklfong.stock.model.TicketItem;
+import space.gavinklfong.stock.model.TicketStatus;
 
 import java.time.LocalDateTime;
 import java.util.List;

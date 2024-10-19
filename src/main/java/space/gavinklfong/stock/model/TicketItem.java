@@ -1,4 +1,4 @@
-package space.gavinklfong.theatre.model;
+package space.gavinklfong.stock.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

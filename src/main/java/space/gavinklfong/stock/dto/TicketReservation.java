@@ -1,4 +1,4 @@
-package space.gavinklfong.theatre.dto;
+package space.gavinklfong.stock.dto;
 
 import lombok.Builder;
 import lombok.Value;

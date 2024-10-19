@@ -1,4 +1,4 @@
-package space.gavinklfong.theatre;
+package space.gavinklfong.stock;
 
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

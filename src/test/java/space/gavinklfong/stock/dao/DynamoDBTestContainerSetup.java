@@ -1,4 +1,4 @@
-package space.gavinklfong.theatre.dao;
+package space.gavinklfong.stock.dao;
 
 import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.GenericContainer;
