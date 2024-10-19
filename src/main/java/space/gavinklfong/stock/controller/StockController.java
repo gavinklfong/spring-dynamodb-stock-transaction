@@ -1,14 +1,14 @@
-package space.gavinklfong.theatre.controller;
+package space.gavinklfong.stock.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
-import space.gavinklfong.theatre.dto.Show;
-import space.gavinklfong.theatre.dto.Ticket;
-import space.gavinklfong.theatre.dto.TicketReservation;
-import space.gavinklfong.theatre.service.ShowTicketService;
+import space.gavinklfong.stock.dto.Show;
+import space.gavinklfong.stock.dto.Ticket;
+import space.gavinklfong.stock.dto.TicketReservation;
+import space.gavinklfong.stock.service.ShowTicketService;
 
 import java.util.List;
 

@@ -1,13 +1,13 @@
-package space.gavinklfong.theatre.service;
+package space.gavinklfong.stock.service;
 
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.springframework.stereotype.Service;
-import space.gavinklfong.theatre.dao.DynamoDBDao;
-import space.gavinklfong.theatre.dto.Show;
-import space.gavinklfong.theatre.dto.Ticket;
-import space.gavinklfong.theatre.model.ShowItem;
-import space.gavinklfong.theatre.model.TicketItem;
+import space.gavinklfong.stock.dao.DynamoDBDao;
+import space.gavinklfong.stock.dto.Show;
+import space.gavinklfong.stock.dto.Ticket;
+import space.gavinklfong.stock.model.ShowItem;
+import space.gavinklfong.stock.model.TicketItem;
 
 import java.util.List;
 import java.util.Optional;

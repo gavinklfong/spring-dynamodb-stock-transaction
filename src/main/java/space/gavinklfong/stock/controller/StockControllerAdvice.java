@@ -1,4 +1,4 @@
-package space.gavinklfong.theatre.controller;
+package space.gavinklfong.stock.controller;
 
 
 import org.springframework.http.HttpStatus;
