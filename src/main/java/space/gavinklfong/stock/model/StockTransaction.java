@@ -32,8 +32,8 @@ public class StockTransaction {
                 "ticker", stringValue(ticker),
                 "tradeAction", stringValue(tradeAction.name()),
                 "unit", numberValue(unit),
-                "unitPrice", numberValue(unitPrice),
-                "reference", stringValue(reference)
+                "unitPrice", numberValue(unitPrice)
+//                "reference", stringValue(reference)
         ));
         return attributeValueMap;
     }
@@ -52,7 +52,7 @@ public class StockTransaction {
             case "tradeAction" -> builder.tradeAction(TradeAction.valueOf(entry.getValue().s()));
             case "ticker" -> builder.ticker(entry.getValue().s());
             case "unit" -> builder.unit(Integer.parseInt(entry.getValue().n()));
-            case "unitPrice" -> builder.unitPrice(new BigDecimal(entry.getValue().s()));
+            case "unitPrice" -> builder.unitPrice(new BigDecimal(entry.getValue().n()));
             case "reference" -> builder.reference(entry.getValue().s());
             default -> throw new IllegalArgumentException("unknown stock transaction attribute: " + entry.getKey());
         }

@@ -2,21 +2,15 @@ package space.gavinklfong.stock.dao;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.RandomStringUtils;
-import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.springframework.stereotype.Service;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 import software.amazon.awssdk.services.dynamodb.model.*;
-import space.gavinklfong.stock.exception.TicketReservationException;
 import space.gavinklfong.stock.model.*;
 
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
-import static java.util.stream.Collectors.averagingDouble;
-import static java.util.stream.Collectors.groupingBy;
-import static software.amazon.awssdk.enhanced.dynamodb.internal.AttributeValues.stringValue;
 import static space.gavinklfong.stock.dao.DynamoDBTableConstant.*;
 
 @Slf4j

@@ -32,7 +32,6 @@ public class DynamoDBTableBuilder {
         CreateTableRequest request = CreateTableRequest.builder()
                 .attributeDefinitions(buildAttributeDefinitions())
                 .keySchema(buildKeySchemaElements())
-                .localSecondaryIndexes(buildLocalSecondaryIndexes())
                 .provisionedThroughput(
                         ProvisionedThroughput.builder()
                         .readCapacityUnits(1L)
@@ -55,43 +54,23 @@ public class DynamoDBTableBuilder {
 
     private List<KeySchemaElement> buildKeySchemaElements() {
         return List.of(KeySchemaElement.builder()
-                        .attributeName("showId")
+                        .attributeName("accountNumber")
                         .keyType(KeyType.HASH)
                         .build(),
                 KeySchemaElement.builder()
-                        .attributeName("sortKey")
+                        .attributeName("timestamp")
                         .keyType(KeyType.RANGE)
-                        .build());
-    }
-
-    private List<LocalSecondaryIndex> buildLocalSecondaryIndexes() {
-        return List.of(LocalSecondaryIndex.builder()
-                        .keySchema(
-                                KeySchemaElement.builder()
-                                        .attributeName("showId")
-                                        .keyType(KeyType.HASH)
-                                        .build(),
-                                KeySchemaElement.builder()
-                                        .attributeName("ticketRef")
-                                        .keyType(KeyType.RANGE)
-                                        .build())
-                        .indexName("ticket-ref-index")
-                        .projection(Projection.builder().projectionType(ProjectionType.ALL).build())
                         .build());
     }
 
     private List<AttributeDefinition> buildAttributeDefinitions() {
         return List.of(
                 AttributeDefinition.builder()
-                        .attributeName("ticketRef")
+                        .attributeName("accountNumber")
                         .attributeType(ScalarAttributeType.S)
                         .build(),
                 AttributeDefinition.builder()
-                        .attributeName("showId")
-                        .attributeType(ScalarAttributeType.S)
-                        .build(),
-                AttributeDefinition.builder()
-                        .attributeName("sortKey")
+                        .attributeName("timestamp")
                         .attributeType(ScalarAttributeType.S)
                         .build());
     }
