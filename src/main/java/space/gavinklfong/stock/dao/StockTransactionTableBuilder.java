@@ -14,7 +14,7 @@ import static space.gavinklfong.stock.dao.DynamoDBTableConstant.TABLE_NAME;
 
 @Slf4j
 @RequiredArgsConstructor
-public class DynamoDBTableBuilder {
+public class StockTransactionTableBuilder {
 
     private final DynamoDbClient dynamoDbClient;
 
